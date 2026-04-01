@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quantity Measurement System</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="nav-icon">⚖</span>
+      <span class="nav-title">QMS</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-history" id="btnViewHistory">
+        <span class="btn-icon">📋</span> History
+      </button>
+
+    </div>
+  </nav>
+
+<!-- Home-Page -->
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-badge">Precision at your fingertips</div>
+      <h1 class="hero-title">Quantity<br/><span class="hero-accent">Measurement</span><br/>System</h1>
+      <p class="hero-sub">Convert, compare, and calculate across all units with elegance</p>
+    </div>
+
+    <div class="cards-grid">
+
+      <div class="cat-card" data-category="length" style="--card-hue:210">
+        <div class="card-glow"></div>
+        <div class="card-icon">📏</div>
+        <h3 class="card-title">Length</h3>
+        <p class="card-desc">meter · km · inch · foot</p>
+        <div class="card-arrow">→</div>
+      </div>
+
+      <div class="cat-card" data-category="weight" style="--card-hue:150">
+        <div class="card-glow"></div>
+        <div class="card-icon">⚖️</div>
+        <h3 class="card-title">Weight</h3>
+        <p class="card-desc">gram · kg · pound</p>
+        <div class="card-arrow">→</div>
+      </div>
+
+      <div class="cat-card" data-category="temperature" style="--card-hue:20">
+        <div class="card-glow"></div>
+        <div class="card-icon">🌡️</div>
+        <h3 class="card-title">Temperature</h3>
+        <p class="card-desc">celsius · fahrenheit · kelvin</p>
+        <div class="card-arrow">→</div>
+      </div>
+
+      <div class="cat-card" data-category="volume" style="--card-hue:280">
+        <div class="card-glow"></div>
+        <div class="card-icon">🧪</div>
+        <h3 class="card-title">Volume</h3>
+        <p class="card-desc">liter · ml · gallon</p>
+        <div class="card-arrow">→</div>
+      </div>
+
+
+
+    </div>
+  </section>
+
+<!-- Category Page -->
+  <section class="page" id="page-category">
+    <button class="back-btn" id="backBtn">← Back</button>
+
+    <div class="cat-header">
+      <span class="cat-icon-lg" id="catIconLg">📏</span>
+      <h2 class="cat-title" id="catTitle">Length</h2>
+    </div>
+
+    <div class="converter-card">
+
+      <!-- Value Input -->
+      <div class="input-group">
+        <label class="input-label">Value</label>
+        <input type="number" id="inputValue" class="main-input" placeholder="Enter a number…" />
+      </div>
+
+      <!-- Second Value (for Add/Sub/Mul/Div) -->
+      <div class="input-group" id="secondValueGroup" style="display:none">
+        <label class="input-label">Second Value</label>
+        <input type="number" id="inputValue2" class="main-input" placeholder="Enter second number…" />
+        <label class="input-label" style="margin-top:8px">Second Unit</label>
+        <select id="secondUnit" class="unit-select"></select>
+      </div>
+
+      <!-- Unit Selectors -->
+      <div class="units-row">
+        <div class="input-group">
+          <label class="input-label">From Unit</label>
+          <select id="fromUnit" class="unit-select"></select>
+        </div>
+        <div class="swap-btn-wrap">
+          <button class="swap-btn" id="swapUnits" title="Swap units">⇄</button>
+        </div>
+        <div class="input-group">
+          <label class="input-label">To Unit</label>
+          <select id="toUnit" class="unit-select"></select>
+        </div>
+      </div>
+
+      <!-- Operation Buttons -->
+      <div class="ops-grid">
+        <button class="op-btn active" data-op="convert">🔄 Convert</button>
+        <button class="op-btn" data-op="add">➕ Add</button>
+        <button class="op-btn" data-op="subtract">➖ Subtract</button>
+        <button class="op-btn" data-op="multiply">✖ Multiply</button>
+        <button class="op-btn" data-op="divide">➗ Divide</button>
+        <button class="op-btn" data-op="compare">⚖ Compare</button>
+      </div>
+
+      <!-- Calculate button (visible for non-convert ops) -->
+      <button class="calc-btn" id="calcBtn" style="display:none">⚡ Calculate</button>
+
+      <!-- Result -->
+      <div class="result-box" id="resultBox">
+        <div class="result-label">Result</div>
+        <div class="result-value" id="resultValue">—</div>
+        <div class="result-detail" id="resultDetail"></div>
+      </div>
+
+      <!-- Error -->
+      <div class="error-msg" id="errorMsg"></div>
+
+    </div>
+  </section>
+
+<!-- Login Page -->
+  <section class="page" id="page-login">
+    <div class="auth-card">
+      <div class="auth-logo">⚖</div>
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Log in to view your history</p>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" />
+      </div>
+
+      <div class="auth-error" id="loginError"></div>
+
+      <button class="auth-btn" id="loginBtn">Log In</button>
+      <p class="auth-switch">No account? <a href="#" id="goSignup">Sign up</a></p>
+    </div>
+  </section>
+
+<!-- Signup Page -->
+  <section class="page" id="page-signup">
+    <div class="auth-card">
+      <div class="auth-logo">⚖</div>
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-sub">Join to save your measurement history</p>
+
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" id="signupName" class="form-input" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="signupEmail" class="form-input" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters" />
+      </div>
+
+      <div class="auth-error" id="signupError"></div>
+
+      <button class="auth-btn" id="signupBtn">Create Account</button>
+      <p class="auth-switch">Already have an account? <a href="#" id="goLogin">Log in</a></p>
+    </div>
+  </section>
+
+
+
+
+<!-- History Page -->
+  <section class="page" id="page-history">
+
+    <button class="back-btn" id="histBackBtn">← Home</button>
+
+    <div class="hist-header">
+      <div>
+        <h2 class="hist-title">History</h2>
+        <p class="hist-sub" id="histUser">Your past operations</p>
+      </div>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="hist-controls">
+      <input type="text" class="hist-search" id="histSearch" placeholder="🔍  Search operations…" />
+      <select class="hist-filter" id="histFilter">
+        <option value="">All Categories</option>
+        <option value="length">Length</option>
+        <option value="weight">Weight</option>
+        <option value="temperature">Temperature</option>
+        <option value="volume">Volume</option>
+      </select>
+      <button class="clear-hist-btn" id="clearHistBtn">🗑 Clear All</button>
+    </div>
+
+    <div class="hist-list" id="histList"></div>
+
+    <div class="hist-empty" id="histEmpty" style="display:none">
+      <div class="empty-icon">📭</div>
+      <p>No history yet. Start converting!</p>
+    </div>
+
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
