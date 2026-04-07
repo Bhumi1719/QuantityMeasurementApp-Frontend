@@ -1,0 +1,56 @@
+<div class="page">
+  <!-- LOGIN -->
+  <div class="auth-card" *ngIf="mode === 'login'">
+    <div class="auth-logo">⚖</div>
+    <h2 class="auth-title">Welcome back</h2>
+    <p class="auth-sub">Log in to view your history</p>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" placeholder="you@example.com"
+        [(ngModel)]="loginEmail" (keydown.enter)="doLogin()" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" placeholder="••••••••"
+        [(ngModel)]="loginPassword" (keydown.enter)="doLogin()" />
+    </div>
+
+    <div class="auth-error" *ngIf="loginError">{{ loginError }}</div>
+
+    <button class="auth-btn" (click)="doLogin()">Log In</button>
+    <p class="auth-switch">No account?
+      <a href="#" (click)="$event.preventDefault(); switchMode('signup')">Sign up</a>
+    </p>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="auth-card" *ngIf="mode === 'signup'">
+    <div class="auth-logo">⚖</div>
+    <h2 class="auth-title">Create account</h2>
+    <p class="auth-sub">Join to save your measurement history</p>
+
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-input" placeholder="Your name"
+        [(ngModel)]="signupName" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" placeholder="you@example.com"
+        [(ngModel)]="signupEmail" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" placeholder="Min 6 characters"
+        [(ngModel)]="signupPassword" (keydown.enter)="doSignup()" />
+    </div>
+
+    <div class="auth-error" *ngIf="signupError">{{ signupError }}</div>
+
+    <button class="auth-btn" (click)="doSignup()">Create Account</button>
+    <p class="auth-switch">Already have an account?
+      <a href="#" (click)="$event.preventDefault(); switchMode('login')">Log in</a>
+    </p>
+  </div>
+</div>
