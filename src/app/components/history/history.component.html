@@ -1,42 +1,55 @@
 <div class="page">
-  <button class="back-btn" (click)="goHome()">← Home</button>
+
+  <button class="back-btn" (click)="goHome()">← Back to Home</button>
 
   <div class="hist-header">
     <div>
-      <h2 class="hist-title">History</h2>
-      <p class="hist-sub">Welcome, {{ userName }}</p>
+      <div class="hist-title">Operation History</div>
+      <div class="hist-sub">👤 {{ userName }}</div>
     </div>
     <button class="logout-btn" (click)="logout()">Logout</button>
   </div>
 
   <div class="hist-controls">
     <input
-      type="text"
       class="hist-search"
-      placeholder="🔍  Search operations…"
+      type="text"
+      placeholder="🔍  Search operations..."
       [(ngModel)]="searchTerm"
-      (input)="applyFilters()"
+      (ngModelChange)="applyFilters()"
     />
-    <select class="hist-filter" [(ngModel)]="filterCat" (change)="applyFilters()">
-      <option value="">All Categories</option>
-      <option *ngFor="let k of categoryKeys" [value]="k">{{ categories[k].icon }} {{ categories[k].label }}</option>
-    </select>
-    <button class="clear-hist-btn" (click)="clearHistory()">🗑 Clear All</button>
+    <button class="clear-hist-btn" (click)="load()">↺ Refresh</button>
   </div>
 
-  <div class="hist-list" *ngIf="filtered.length > 0">
-    <div class="hist-item" *ngFor="let item of filtered; let i = index" [style.animation-delay]="i * 0.04 + 's'">
-      <span class="hist-op-badge" [ngClass]="'badge-' + item.op">{{ item.op }}</span>
+  <!-- Loading -->
+  <div *ngIf="loading" class="hist-empty">
+    <div class="empty-icon">⏳</div>
+    <p>Loading history...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg && !loading" class="hist-empty">
+    <div class="empty-icon">⚠️</div>
+    <p>{{ errorMsg }}</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !errorMsg && filtered.length === 0" class="hist-empty">
+    <div class="empty-icon">📭</div>
+    <p>No history found. Start converting!</p>
+  </div>
+
+  <!-- List -->
+  <div class="hist-list" *ngIf="!loading && !errorMsg">
+    <div class="hist-item" *ngFor="let item of filtered">
+      <span class="hist-op-badge" [ngClass]="getBadgeClass(item.operation)">
+        {{ item.operation }}
+      </span>
       <div class="hist-info">
-        <div class="hist-info-top">{{ item.expression }}</div>
-        <div class="hist-info-bottom">= {{ item.result }} · {{ catIcon(item.category) }} {{ item.category }}</div>
+        <div class="hist-info-top">{{ item.result }}</div>
       </div>
-      <span class="hist-time">{{ timeStr(item.timestamp) }}</span>
+      <span class="hist-time">#{{ item.id }}</span>
     </div>
   </div>
 
-  <div class="hist-empty" *ngIf="filtered.length === 0">
-    <div class="empty-icon">📭</div>
-    <p>No history yet. Start converting!</p>
-  </div>
 </div>

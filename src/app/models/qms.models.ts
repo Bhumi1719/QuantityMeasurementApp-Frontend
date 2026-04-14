@@ -10,18 +10,15 @@ export interface Category {
   units: Record<string, UnitDef>;
 }
 
-export interface User {
+export interface UserInfo {
   name: string;
   email: string;
-  password: string;
 }
 
+// Backend history record shape
 export interface HistoryRecord {
   id: number;
-  timestamp: number;
-  category: string;
-  op: string;
-  expression: string;
+  operation: string;
   result: string;
 }
 

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ConverterService } from '../../services/converter.service';
-import { HistoryService } from '../../services/history.service';
+import { ConverterService, QuantityDTO } from '../../services/converter.service';
 import { CATEGORIES } from '../../models/units.data';
 import { Operation } from '../../models/qms.models';
 
@@ -28,6 +27,7 @@ export class CategoryComponent implements OnInit {
   resultDetail = '';
   errorMsg = '';
   resultPop = false;
+  isLoading = false;
 
   ops: { key: Operation; label: string }[] = [
     { key: 'convert',  label: '🔄 Convert'  },
@@ -45,8 +45,7 @@ export class CategoryComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private converter: ConverterService,
-    private history: HistoryService
+    private converter: ConverterService
   ) {}
 
   ngOnInit(): void {
@@ -101,29 +100,40 @@ export class CategoryComponent implements OnInit {
       let res  = '';
 
       if (this.currentOp === 'convert') {
-        if (this.inputValue === null || this.inputValue === undefined || String(this.inputValue) === '') return;
-        const result = this.converter.convert(this.category, this.fromUnit, this.toUnit, v1);
+        if (this.inputValue === null || String(this.inputValue) === '') return;
+        // Local calculation (instant) + save to backend
+        const result = this.converter.convertLocal(this.category, this.fromUnit, this.toUnit, v1);
         res  = `${this.converter.fmt(result)} ${this.unitLabels[this.toUnit]}`;
         expr = `${v1} ${this.unitLabels[this.fromUnit]} → ${this.unitLabels[this.toUnit]}`;
         this.resultValue  = res;
         this.resultDetail = expr;
+        this.triggerPop();
+
+        // Save to backend asynchronously
+        const dto: QuantityDTO = { value: v1, unit: this.fromUnit.toUpperCase(), type: this.category.toUpperCase() };
+        this.converter.convertApi(dto, this.toUnit.toUpperCase()).subscribe({ error: () => {} });
+
       } else if (this.currentOp === 'compare') {
-        const cmp = this.converter.compare(this.category, v1, this.fromUnit, v2, this.secondUnit);
-        res  = cmp;
-        expr = `Compare ${v1} ${this.unitLabels[this.fromUnit]} vs ${v2} ${this.unitLabels[this.secondUnit]}`;
+        const cmp = this.converter.compareLocal(this.category, v1, this.fromUnit, v2, this.secondUnit);
         this.resultValue  = cmp;
         this.resultDetail = '';
+        this.triggerPop();
+
       } else {
-        const { result, unit } = this.converter.arithmetic(this.category, this.currentOp, v1, this.fromUnit, v2, this.secondUnit);
+        const { result, unit } = this.converter.arithmeticLocal(this.category, this.currentOp, v1, this.fromUnit, v2, this.secondUnit);
         res  = `${this.converter.fmt(result)} ${this.unitLabels[unit]}`;
         expr = `${v1} ${this.unitLabels[this.fromUnit]} ${this.opSymbol} ${v2} ${this.unitLabels[this.secondUnit]}`;
         this.resultValue  = res;
         this.resultDetail = expr;
+        this.triggerPop();
+
+        // Save add operations to backend
+        if (this.currentOp === 'add') {
+          const q1: QuantityDTO = { value: v1, unit: this.fromUnit.toUpperCase(), type: this.category.toUpperCase() };
+          const q2: QuantityDTO = { value: v2, unit: this.secondUnit.toUpperCase(), type: this.category.toUpperCase() };
+          this.converter.addApi(q1, q2).subscribe({ error: () => {} });
+        }
       }
-
-      this.triggerPop();
-      this.history.save({ category: this.category, op: this.currentOp, expression: expr, result: res });
-
     } catch (e: any) {
       this.errorMsg = e.message;
     }

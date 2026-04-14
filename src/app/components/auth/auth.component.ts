@@ -14,27 +14,48 @@ export class AuthComponent {
   loginEmail    = '';
   loginPassword = '';
   loginError    = '';
+  loginLoading  = false;
 
   // Signup
   signupName     = '';
   signupEmail    = '';
   signupPassword = '';
   signupError    = '';
+  signupLoading  = false;
 
   constructor(private auth: AuthService, private router: Router) {}
 
   doLogin(): void {
     this.loginError = '';
-    const err = this.auth.login(this.loginEmail, this.loginPassword);
-    if (err) { this.loginError = err; return; }
-    this.router.navigate(['/history']);
+    if (!this.loginEmail || !this.loginPassword) {
+      this.loginError = 'Please fill in all fields.'; return;
+    }
+    this.loginLoading = true;
+    this.auth.login(this.loginEmail, this.loginPassword).subscribe({
+      next: () => { this.loginLoading = false; this.router.navigate(['/history']); },
+      error: (err) => {
+        this.loginLoading = false;
+        this.loginError = err.error || 'Login failed. Check credentials.';
+      }
+    });
   }
 
   doSignup(): void {
     this.signupError = '';
-    const err = this.auth.signup(this.signupName, this.signupEmail, this.signupPassword);
-    if (err) { this.signupError = err; return; }
-    this.router.navigate(['/history']);
+    if (!this.signupName || !this.signupEmail || !this.signupPassword) {
+      this.signupError = 'Please fill in all fields.'; return;
+    }
+    if (this.signupPassword.length < 6) {
+      this.signupError = 'Password must be at least 6 characters.'; return;
+    }
+    this.signupLoading = true;
+    this.auth.signup(this.signupName, this.signupEmail, this.signupPassword).subscribe({
+      next: () => { this.signupLoading = false; this.router.navigate(['/history']); },
+      error: (err) => {
+        this.signupLoading = false;
+        this.signupError = err.error || 'Signup failed. Try again.';
+      }
+    });
   }
 
   switchMode(m: 'login' | 'signup'): void {

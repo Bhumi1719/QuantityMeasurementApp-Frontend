@@ -1,59 +1,47 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { User } from '../models/qms.models';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-const USERS_KEY   = 'qms_users';
-const SESSION_KEY = 'qms_session';
+const API = 'http://localhost:8080/api/v1/auth';
+
+export interface UserInfo {
+  name: string;
+  email: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private _user$ = new BehaviorSubject<User | null>(this.getSession());
-  user$ = this._user$.asObservable();
+  private _loggedIn$ = new BehaviorSubject<boolean>(!!localStorage.getItem('jwt_token'));
+  loggedIn$ = this._loggedIn$.asObservable();
 
-  get isLoggedIn(): boolean { return !!this._user$.value; }
-  get currentUser(): User | null { return this._user$.value; }
+  constructor(private http: HttpClient) {}
 
-  private getUsers(): User[] {
-    try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
-    catch { return []; }
+  get isLoggedIn(): boolean { return !!localStorage.getItem('jwt_token'); }
+
+  get currentUser(): UserInfo | null {
+    const u = localStorage.getItem('user_info');
+    return u ? JSON.parse(u) : null;
   }
 
-  private getSession(): User | null {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
-    catch { return null; }
+  signup(username: string, email: string, password: string): Observable<string> {
+    return this.http.post(`${API}/signup`, { username, email, password }, { responseType: 'text' })
+      .pipe(tap(token => this.saveSession(token, { name: username, email })));
   }
 
-  signup(name: string, email: string, password: string): string | null {
-    if (!name || !email || !password) return 'Please fill in all fields.';
-    if (password.length < 6) return 'Password must be at least 6 characters.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please enter a valid email.';
-
-    const users = this.getUsers();
-    if (users.find(u => u.email === email)) return 'Email already registered.';
-
-    const user: User = { name, email, password };
-    users.push(user);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    this.setSession(user);
-    return null;
-  }
-
-  login(email: string, password: string): string | null {
-    if (!email || !password) return 'Please fill in all fields.';
-    const users = this.getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) return 'Invalid email or password.';
-    this.setSession(user);
-    return null;
+  login(email: string, password: string): Observable<string> {
+    return this.http.post(`${API}/login`, { email, password }, { responseType: 'text' })
+      .pipe(tap(token => this.saveSession(token, { name: email.split('@')[0], email })));
   }
 
   logout(): void {
-    localStorage.removeItem(SESSION_KEY);
-    this._user$.next(null);
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_info');
+    this._loggedIn$.next(false);
   }
 
-  private setSession(user: User): void {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    this._user$.next(user);
+  private saveSession(token: string, user: UserInfo): void {
+    localStorage.setItem('jwt_token', token);
+    localStorage.setItem('user_info', JSON.stringify(user));
+    this._loggedIn$.next(true);
   }
 }

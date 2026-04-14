@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HistoryService } from '../../services/history.service';
 import { HistoryRecord } from '../../models/qms.models';
-import { CATEGORIES } from '../../models/units.data';
 
 @Component({
   selector: 'app-history',
@@ -14,11 +13,9 @@ export class HistoryComponent implements OnInit {
   allItems: HistoryRecord[] = [];
   filtered: HistoryRecord[] = [];
   searchTerm = '';
-  filterCat  = '';
   userName   = '';
-
-  categoryKeys = Object.keys(CATEGORIES);
-  categories   = CATEGORIES;
+  loading    = false;
+  errorMsg   = '';
 
   constructor(
     public auth: AuthService,
@@ -34,30 +31,44 @@ export class HistoryComponent implements OnInit {
   }
 
   load(): void {
-    this.allItems = this.histSvc.getAll();
-    this.applyFilters();
+    this.loading = true;
+    this.errorMsg = '';
+    this.histSvc.getAll().subscribe({
+      next: (data) => {
+        // Sort newest first (highest id first)
+        this.allItems = data.sort((a, b) => b.id - a.id);
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMsg = 'Could not load history. Make sure you are logged in.';
+        this.loading = false;
+      }
+    });
   }
 
   applyFilters(): void {
-    let items = [...this.allItems];
-    if (this.filterCat) items = items.filter(i => i.category === this.filterCat);
-    if (this.searchTerm) {
-      const q = this.searchTerm.toLowerCase();
-      items = items.filter(i =>
-        i.expression?.toLowerCase().includes(q) ||
-        i.result?.toLowerCase().includes(q) ||
-        i.op?.toLowerCase().includes(q) ||
-        i.category?.toLowerCase().includes(q)
-      );
+    if (!this.searchTerm.trim()) {
+      this.filtered = [...this.allItems];
+      return;
     }
-    this.filtered = items;
+    const q = this.searchTerm.toLowerCase();
+    this.filtered = this.allItems.filter(i =>
+      i.operation?.toLowerCase().includes(q) ||
+      i.result?.toLowerCase().includes(q)
+    );
   }
 
-  clearHistory(): void {
-    if (confirm('Clear all history? This cannot be undone.')) {
-      this.histSvc.clear();
-      this.load();
-    }
+  getBadgeClass(op: string): string {
+    const map: Record<string, string> = {
+      'ADD':      'badge-add',
+      'CONVERT':  'badge-convert',
+      'SUBTRACT': 'badge-subtract',
+      'MULTIPLY': 'badge-multiply',
+      'DIVIDE':   'badge-divide',
+      'COMPARE':  'badge-compare',
+    };
+    return map[op?.toUpperCase()] || 'badge-convert';
   }
 
   logout(): void {
@@ -66,12 +77,4 @@ export class HistoryComponent implements OnInit {
   }
 
   goHome(): void { this.router.navigate(['/']); }
-
-  timeStr(ts: number): string {
-    return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  catIcon(cat: string): string {
-    return CATEGORIES[cat]?.icon || '';
-  }
 }

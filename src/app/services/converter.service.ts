@@ -1,14 +1,26 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { CATEGORIES } from '../models/units.data';
+
+const API = 'http://localhost:8080/api/v1/quantities';
+
+export interface QuantityDTO {
+  value: number;
+  unit: string;
+  type: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ConverterService {
 
-  getCategories() { return CATEGORIES; }
+  constructor(private http: HttpClient) {}
 
+  /* ── Local helpers (used for instant preview) ── */
+  getCategories() { return CATEGORIES; }
   getCategoryKeys() { return Object.keys(CATEGORIES); }
 
-  convert(category: string, fromUnit: string, toUnit: string, value: number): number {
+  convertLocal(category: string, fromUnit: string, toUnit: string, value: number): number {
     if (isNaN(value)) throw new Error('Please enter a valid number.');
     if (category === 'temperature') return this.convertTemperature(fromUnit, toUnit, value);
     const cat = CATEGORIES[category];
@@ -19,42 +31,37 @@ export class ConverterService {
   private convertTemperature(from: string, to: string, v: number): number {
     if (from === to) return v;
     let c: number;
-    if (from === 'celsius')    c = v;
+    if (from === 'celsius')      c = v;
     else if (from === 'fahrenheit') c = (v - 32) * 5 / 9;
-    else {
-      if (v < 0) throw new Error('Kelvin cannot be negative.');
-      c = v - 273.15;
-    }
+    else { if (v < 0) throw new Error('Kelvin cannot be negative.'); c = v - 273.15; }
     if (to === 'celsius')    return c;
     if (to === 'fahrenheit') return c * 9 / 5 + 32;
     return c + 273.15;
   }
 
-  arithmetic(category: string, op: string, val1: number, unit1: string, val2: number, unit2: string): { result: number; unit: string } {
+  arithmeticLocal(category: string, op: string, val1: number, unit1: string, val2: number, unit2: string): { result: number; unit: string } {
     if (isNaN(val1) || isNaN(val2)) throw new Error('Please enter valid numbers for both values.');
     if (op === 'divide' && val2 === 0) throw new Error('Cannot divide by zero.');
-
     if (category === 'temperature') {
-      let result = 0;
-      if (op === 'add')      result = val1 + val2;
-      if (op === 'subtract') result = val1 - val2;
-      if (op === 'multiply') result = val1 * val2;
-      if (op === 'divide')   result = val1 / val2;
-      return { result, unit: unit1 };
+      let r = 0;
+      if (op === 'add')      r = val1 + val2;
+      if (op === 'subtract') r = val1 - val2;
+      if (op === 'multiply') r = val1 * val2;
+      if (op === 'divide')   r = val1 / val2;
+      return { result: r, unit: unit1 };
     }
-
     const cat = CATEGORIES[category];
-    const base1 = cat.units[unit1].toBase!(val1);
-    const base2 = cat.units[unit2].toBase!(val2);
-    let baseResult = 0;
-    if (op === 'add')      baseResult = base1 + base2;
-    if (op === 'subtract') baseResult = base1 - base2;
-    if (op === 'multiply') baseResult = base1 * base2;
-    if (op === 'divide')   baseResult = base1 / base2;
-    return { result: cat.units[unit1].fromBase!(baseResult), unit: unit1 };
+    const b1 = cat.units[unit1].toBase!(val1);
+    const b2 = cat.units[unit2].toBase!(val2);
+    let br = 0;
+    if (op === 'add')      br = b1 + b2;
+    if (op === 'subtract') br = b1 - b2;
+    if (op === 'multiply') br = b1 * b2;
+    if (op === 'divide')   br = b1 / b2;
+    return { result: cat.units[unit1].fromBase!(br), unit: unit1 };
   }
 
-  compare(category: string, val1: number, unit1: string, val2: number, unit2: string): string {
+  compareLocal(category: string, val1: number, unit1: string, val2: number, unit2: string): string {
     if (isNaN(val1) || isNaN(val2)) throw new Error('Please enter valid numbers for both values.');
     let base1: number, base2: number;
     if (category === 'temperature') {
@@ -70,6 +77,20 @@ export class ConverterService {
     if (Math.abs(base1 - base2) < 1e-10) return `${l1} = ${l2}  ✓ Equal`;
     if (base1 > base2) return `${l1}  >  ${l2}`;
     return `${l1}  <  ${l2}`;
+  }
+
+  /* ── Backend API calls (saves to DB) ── */
+  convertApi(dto: QuantityDTO, target: string): Observable<QuantityDTO> {
+    const params = new HttpParams().set('target', target);
+    return this.http.post<QuantityDTO>(`${API}/convert`, dto, { params });
+  }
+
+  addApi(q1: QuantityDTO, q2: QuantityDTO): Observable<QuantityDTO> {
+    return this.http.post<QuantityDTO>(`${API}/add`, [q1, q2]);
+  }
+
+  compareApi(q1: QuantityDTO, q2: QuantityDTO): Observable<boolean> {
+    return this.http.post<boolean>(`${API}/compare`, [q1, q2]);
   }
 
   fmt(n: number): string {
