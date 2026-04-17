@@ -1,0 +1,55 @@
+<div class="page">
+
+  <button class="back-btn" (click)="goHome()">← Back to Home</button>
+
+  <div class="hist-header">
+    <div>
+      <div class="hist-title">Operation History</div>
+      <div class="hist-sub">👤 {{ userName }}</div>
+    </div>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+
+  <div class="hist-controls">
+    <input
+      class="hist-search"
+      type="text"
+      placeholder="🔍  Search operations..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="applyFilters()"
+    />
+    <button class="clear-hist-btn" (click)="load()">↺ Refresh</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="hist-empty">
+    <div class="empty-icon">⏳</div>
+    <p>Loading history...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg && !loading" class="hist-empty">
+    <div class="empty-icon">⚠️</div>
+    <p>{{ errorMsg }}</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !errorMsg && filtered.length === 0" class="hist-empty">
+    <div class="empty-icon">📭</div>
+    <p>No history found. Start converting!</p>
+  </div>
+
+  <!-- List -->
+  <div class="hist-list" *ngIf="!loading && !errorMsg">
+    <div class="hist-item" *ngFor="let item of filtered">
+      <span class="hist-op-badge" [ngClass]="getBadgeClass(item.operation)">
+        {{ item.operation }}
+      </span>
+      <div class="hist-info">
+        <div class="hist-info-top">{{ item.result }}</div>
+      </div>
+      <span class="hist-time">#{{ item.id }}</span>
+    </div>
+  </div>
+
+</div>

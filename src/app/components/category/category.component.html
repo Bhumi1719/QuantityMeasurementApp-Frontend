@@ -1,0 +1,83 @@
+<div class="page">
+  <button class="back-btn" (click)="goBack()">← Back</button>
+
+  <div class="cat-header">
+    <span class="cat-icon-lg">{{ catIcon }}</span>
+    <h2 class="cat-title">{{ catLabel }}</h2>
+  </div>
+
+  <div class="converter-card">
+
+    <!-- Value 1 -->
+    <div class="input-group">
+      <label class="input-label">Value</label>
+      <input
+        type="number"
+        class="main-input"
+        placeholder="Enter a number…"
+        [(ngModel)]="inputValue"
+        (input)="onInputChange()"
+        (keydown.enter)="runOperation()"
+      />
+    </div>
+
+    <!-- Second Value -->
+    <div class="input-group" *ngIf="needsSecond">
+      <label class="input-label">Second Value</label>
+      <input
+        type="number"
+        class="main-input"
+        placeholder="Enter second number…"
+        [(ngModel)]="inputValue2"
+        (keydown.enter)="runOperation()"
+      />
+      <label class="input-label" style="margin-top:8px">Second Unit</label>
+      <select class="unit-select" [(ngModel)]="secondUnit">
+        <option *ngFor="let k of unitKeys" [value]="k">{{ unitLabels[k] }}</option>
+      </select>
+    </div>
+
+    <!-- Unit Row -->
+    <div class="units-row">
+      <div class="input-group">
+        <label class="input-label">From Unit</label>
+        <select class="unit-select" [(ngModel)]="fromUnit" (change)="onInputChange()">
+          <option *ngFor="let k of unitKeys" [value]="k">{{ unitLabels[k] }}</option>
+        </select>
+      </div>
+      <div class="swap-btn-wrap">
+        <button class="swap-btn" (click)="swapUnits()" title="Swap units">⇄</button>
+      </div>
+      <div class="input-group">
+        <label class="input-label">To Unit</label>
+        <select class="unit-select" [(ngModel)]="toUnit" (change)="onInputChange()">
+          <option *ngFor="let k of unitKeys" [value]="k">{{ unitLabels[k] }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Operations -->
+    <div class="ops-grid">
+      <button
+        class="op-btn"
+        *ngFor="let op of ops"
+        [class.active]="currentOp === op.key"
+        (click)="selectOp(op.key)"
+      >{{ op.label }}</button>
+    </div>
+
+    <!-- Calculate Button -->
+    <button class="calc-btn" *ngIf="needsSecond" (click)="runOperation()">⚡ Calculate</button>
+
+    <!-- Result -->
+    <div class="result-box" [class.pop]="resultPop">
+      <div class="result-label">Result</div>
+      <div class="result-value">{{ resultValue }}</div>
+      <div class="result-detail">{{ resultDetail }}</div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  </div>
+</div>

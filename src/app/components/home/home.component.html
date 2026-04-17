@@ -1,0 +1,22 @@
+<div class="page">
+  <div class="hero">
+    <div class="hero-badge">Precision at your fingertips</div>
+    <h1 class="hero-title">Quantity<br/><span class="hero-accent">Measurement</span><br/>System</h1>
+    <p class="hero-sub">Convert, compare, and calculate across all units with elegance</p>
+  </div>
+
+  <div class="cards-grid">
+    <div
+      class="cat-card"
+      *ngFor="let cat of categories"
+      [style.--card-hue]="cat.hue"
+      (click)="open(cat.key)"
+    >
+      <div class="card-glow"></div>
+      <div class="card-icon">{{ cat.icon }}</div>
+      <h3 class="card-title">{{ cat.title }}</h3>
+      <p class="card-desc">{{ cat.desc }}</p>
+      <div class="card-arrow">→</div>
+    </div>
+  </div>
+</div>
