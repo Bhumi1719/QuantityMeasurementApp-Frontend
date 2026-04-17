@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-const API = 'http://localhost:8080/api/v1/auth';
+const API = 'https://api-u4qo.onrender.com//api/v1/auth';
 
 export interface UserInfo {
   name: string;
