@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CATEGORIES } from '../models/units.data';
 
-const API = 'http://localhost:8080/api/v1/quantities';
+const API = 'https://api-u4qo.onrender.com/api/v1/quantities';
 
 export interface QuantityDTO {
   value: number;
