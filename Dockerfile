@@ -7,18 +7,18 @@ RUN npm ci
 
 COPY . .
 
-# FIXED
-RUN npm run build
+# FORCE BUILD OUTPUT CORRECTLY
+RUN npm run build -- --configuration production --output-path=dist/qms-angular
 
 FROM nginx:alpine
 
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# CLEAR DEFAULT FILES
+# CLEAN DEFAULT FILES
 RUN rm -rf /usr/share/nginx/html/*
 
-# CORRECT PATH
+# COPY BUILD OUTPUT
 COPY --from=build /app/dist/qms-angular /usr/share/nginx/html
 
 EXPOSE 80
