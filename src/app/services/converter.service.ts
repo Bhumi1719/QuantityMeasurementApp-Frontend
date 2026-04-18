@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CATEGORIES } from '../models/units.data';
-
-const API = 'https://api-u4qo.onrender.com/api/v1/quantities';
+import { environment } from '../../environments/environment';
 
 export interface QuantityDTO {
   value: number;
@@ -13,10 +12,10 @@ export interface QuantityDTO {
 
 @Injectable({ providedIn: 'root' })
 export class ConverterService {
+  private apiUrl = `${environment.apiUrl}/api/v1/quantities`;
 
   constructor(private http: HttpClient) {}
 
-  /* ── Local helpers (used for instant preview) ── */
   getCategories() { return CATEGORIES; }
   getCategoryKeys() { return Object.keys(CATEGORIES); }
 
@@ -79,18 +78,17 @@ export class ConverterService {
     return `${l1}  <  ${l2}`;
   }
 
-  /* ── Backend API calls (saves to DB) ── */
   convertApi(dto: QuantityDTO, target: string): Observable<QuantityDTO> {
     const params = new HttpParams().set('target', target);
-    return this.http.post<QuantityDTO>(`${API}/convert`, dto, { params });
+    return this.http.post<QuantityDTO>(`${this.apiUrl}/convert`, dto, { params });
   }
 
   addApi(q1: QuantityDTO, q2: QuantityDTO): Observable<QuantityDTO> {
-    return this.http.post<QuantityDTO>(`${API}/add`, [q1, q2]);
+    return this.http.post<QuantityDTO>(`${this.apiUrl}/add`, [q1, q2]);
   }
 
   compareApi(q1: QuantityDTO, q2: QuantityDTO): Observable<boolean> {
-    return this.http.post<boolean>(`${API}/compare`, [q1, q2]);
+    return this.http.post<boolean>(`${this.apiUrl}/compare`, [q1, q2]);
   }
 
   fmt(n: number): string {

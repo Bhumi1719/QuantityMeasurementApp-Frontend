@@ -9,9 +9,9 @@ import { Router } from '@angular/router';
 export class HomeComponent {
   categories = [
     { key: 'length',      icon: '📏', title: 'Length',      desc: 'meter · km · inch · foot',         hue: 210 },
-    { key: 'weight',      icon: '⚖️', title: 'Weight',      desc: 'gram · kg · pound',        hue: 150 },
+    { key: 'weight',      icon: '⚖️', title: 'Weight',      desc: 'gram · kg · pound · ounce',        hue: 150 },
     { key: 'temperature', icon: '🌡️', title: 'Temperature', desc: 'celsius · fahrenheit · kelvin',    hue: 20  },
-    { key: 'volume',      icon: '🧪', title: 'Volume',      desc: 'liter · ml · gallon',        hue: 280 },
+    { key: 'volume',      icon: '🧪', title: 'Volume',      desc: 'liter · ml · gallon · cup',        hue: 280 },
 
   ];
 

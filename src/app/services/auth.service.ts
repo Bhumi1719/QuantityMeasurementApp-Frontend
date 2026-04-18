@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-
-const API = 'https://api-u4qo.onrender.com//api/v1/auth';
+import { environment } from '../../environments/environment';
 
 export interface UserInfo {
   name: string;
@@ -11,6 +10,7 @@ export interface UserInfo {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private apiUrl = `${environment.apiUrl}/api/v1/auth`;
   private _loggedIn$ = new BehaviorSubject<boolean>(!!localStorage.getItem('jwt_token'));
   loggedIn$ = this._loggedIn$.asObservable();
 
@@ -24,12 +24,12 @@ export class AuthService {
   }
 
   signup(username: string, email: string, password: string): Observable<string> {
-    return this.http.post(`${API}/signup`, { username, email, password }, { responseType: 'text' })
+    return this.http.post(`${this.apiUrl}/signup`, { username, email, password }, { responseType: 'text' })
       .pipe(tap(token => this.saveSession(token, { name: username, email })));
   }
 
   login(email: string, password: string): Observable<string> {
-    return this.http.post(`${API}/login`, { email, password }, { responseType: 'text' })
+    return this.http.post(`${this.apiUrl}/login`, { email, password }, { responseType: 'text' })
       .pipe(tap(token => this.saveSession(token, { name: email.split('@')[0], email })));
   }
 
